@@ -4,7 +4,7 @@
   "description": "tech-demo for kanttiinit bot",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon lib/index.js --exec babel-node",
+    "start": "nodemon index.js --exec babel-node",
     "build": "node_modules/.bin/babel lib -d dist",
     "serve": "node dist/index.js",
     "install": "npm run build"
