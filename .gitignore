@@ -3,3 +3,5 @@ node_modules
 *.png
 dist
 run.sh
+npm-debug.log
+token.sh

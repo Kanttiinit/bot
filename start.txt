@@ -1,2 +1,13 @@
+KanttiinitBOT - lunch menus inside telegram, powered by kanttiinit.fi
+
 The following commands are available:
-/get täffä
+
+/food => interactive help for deciding where to eat
+/<send location> => the closest 3 restaurants near you
+/menu [restaurantName OR ID] => lunch at the given restaurant
+/sub => posts the subway of the day
+
+/restaurants => a list of restaurantNames and IDs
+/start => this text
+/help => this text
+/feedback [text] => sends a message with FRIENDLY feedback to the developers ;)
