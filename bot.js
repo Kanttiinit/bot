@@ -5,6 +5,7 @@ const TGBot = require('node-telegram-bot-api');
 
 const packageInfo = require('./package.json');
 const token = process.env.TG_BOT_TOKEN;
+const feedbackChat = process.env.CHAT_ID;
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -13,6 +14,8 @@ if (process.env.NODE_ENV === 'production') {
 } else {
    bot = new TGBot(token, {polling:true});
 }
+
+const help = fs.readFileSync('./start.txt');
 
 function json(url) {
    return fetch(url).then(r => r.json());
@@ -39,6 +42,14 @@ function postRestaurantWithName(chatID, restaurantName) {
       }
    });
 };
+
+bot.onText(/^\/(start|help)$/, msg => {
+   bot.sendMessage(msg.chat.id, help);
+});
+
+bot.onText(/^\/feedback (.+)$/, (msg, match) => {
+   bot.sendMessage(feedbackChat, 'NEW FEEDBACK (BOT):\n' + match[1]);
+});
 
 bot.onText(/^\/get (.+)$/, (msg, match) => {
    const requested = match[1].toLowerCase();
