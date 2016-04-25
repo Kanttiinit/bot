@@ -27,11 +27,10 @@ function postRestaurantWithID(chatID, restaurantID) {
    });
 };
 
-
 function postRestaurantWithName(chatID, restaurantName) {
    json('https://api.kanttiinit.fi/restaurants')
    .then(restaurants => {
-      const restaurant = restaurants.find(r => r.name.toLowerCase() === restaurantName);
+      const restaurant = restaurants.find(r => r.name.match(new RegExp('^' + restaurantName, 'i')));
 
       if (restaurant) {
          postRestaurantWithID(chatID, restaurant.id);
