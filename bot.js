@@ -67,9 +67,7 @@ bot.onText(/^\/getSub$/, (msg, match) => {
    const chatID = msg.chat.id;
    json('https://api.kanttiinit.fi/menus/2')
    .then(body => {
-      var currentMenu = body[0].Menus[0].courses;
-
-      const subway = currentMenu.find(m => m.title.match(/Subway\:/));
+      const subway = body[0].Menus[0].courses.find(m => m.title.match(/Subway\:/));
       if (subway) {
          bot.sendMessage(chatID, subway.title);
       } else {
