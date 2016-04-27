@@ -1,4 +1,4 @@
-KanttiinitBOT - lunch menus inside telegram, powered by kanttiinit.fi
+Use me to get lunch menus within telegram - powered by kanttiinit.fi
 
 The following commands are available:
 

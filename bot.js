@@ -109,6 +109,15 @@ bot.onText(/^\/restaurants$/, (msg, match) => {
 	});
 });
 
+bot.onText(/^(hello|hey|hi|moi|mo|hei|sup)$/i, msg => {
+	const greeting = "Hello, " + msg.from.first_name + ".\nI'm KanttiinitBOT and I'm " + packageInfo.version + " versions old.";
+	console.log(msg);
+	bot.sendMessage(msg.chat.id, greeting)
+	.then( x => {
+		bot.sendMessage(msg.chat.id, help);
+	});
+})
+
 bot.onText(/^\/(start|help)$/, msg => {
 	bot.sendMessage(msg.chat.id, help);
 });
