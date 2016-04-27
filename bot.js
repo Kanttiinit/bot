@@ -3,8 +3,10 @@ const request = require('request');
 const fs = require('fs');
 const TGBot = require('node-telegram-bot-api');
 const packageInfo = require('./package.json');
+
 const token = process.env.TG_BOT_TOKEN;
 const feedbackChat = process.env.CHAT_ID;
+const greeting = "Hello, human being.\nI'm KanttiinitBOT and I'm " + packageInfo.version + ' versions old.';
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -20,6 +22,14 @@ const help = fs.readFileSync('./start.txt');
 
 function json(url) {
 	return fetch(url).then(r => r.json());
+}
+
+function greet(msg) {
+	return bot.sendMessage(msg.chat.id, greeting);
+}
+
+function giveHelp(msg) {
+	return bot.sendMessage(msg.chat.id, help);
 }
 
 function postRestaurantWithID(chatID, restaurantID) {
@@ -59,18 +69,33 @@ function postClosestRestaurants(msg, n) {
 	});
 };
 
-bot.onText(/^\/food$/, (msg, match) => {
-	bot.sendMessage(msg.chat.id, 'Can I use your location?', {
-		'reply_markup':{
-			'keyboard':[[{
-				'text':'Sure, use my location!',
-				'request_location':true
-			}]],
-			'resize_keyboard':true,
-			'one_time_keyboard':true,
-			'selective':true
-		}
-	});
+bot.onText(/^\/food/, (msg, match) => {
+	if(msg.chat.type === 'private') {
+		bot.sendMessage(msg.chat.id, 'Can I use your location?', {
+			'reply_markup':{
+				'keyboard':[[{
+					'text':'Sure, use my location!',
+					'request_location':true
+				}], [{
+					'text':"No, don't use my location.",
+					'hide_keyboard':true
+				}]],
+				'resize_keyboard':true,
+				'one_time_keyboard':true,
+				'selective':true
+			}
+		});
+	} else {
+		bot.sendMessage(msg.chat.id, 'The /food command only works in private chats :(');
+	}
+});
+
+bot.onText(/No, don't use my location./, (msg, match) => {
+	bot.sendMessage(msg.chat.id, "Feel free to use the /menu command, then :)");
+})
+
+bot.onText(/^\/menu/, (msg, match) => {
+	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please. \nYou can get them with /restaurants ');
 });
 
 bot.onText(/^\/menu (.+)$/, (msg, match) => {
@@ -83,7 +108,7 @@ bot.onText(/^\/menu (.+)$/, (msg, match) => {
 	}
 });
 
-bot.onText(/^\/sub$/, (msg, match) => {
+bot.onText(/^\/sub/, (msg, match) => {
 	const chatID = msg.chat.id;
 	json('https://api.kanttiinit.fi/menus/2')
 	.then(body => {
@@ -91,12 +116,12 @@ bot.onText(/^\/sub$/, (msg, match) => {
 		if (subway) {
 			bot.sendMessage(chatID, subway.title);
 		} else {
-			bot.sendMessage(chatID, 'No Subway today :(');
+			bot.sendMessage(chatID, 'No Subway today :(' );
 		}
 	});
 });
 
-bot.onText(/^\/restaurants$/, (msg, match) => {
+bot.onText(/^\/restaurants/, (msg, match) => {
 	const chatID = msg.chat.id;
 	json('https://api.kanttiinit.fi/restaurants')
 	.then(restaurants => {
@@ -110,19 +135,29 @@ bot.onText(/^\/restaurants$/, (msg, match) => {
 });
 
 bot.onText(/^(hello|hey|hi|moi|mo|hei|sup)$/i, msg => {
-	const greeting = "Hello, " + msg.from.first_name + ".\nI'm KanttiinitBOT and I'm " + packageInfo.version + " versions old.";
-	bot.sendMessage(msg.chat.id, greeting)
-	.then( x => {
-		bot.sendMessage(msg.chat.id, help);
-	});
-})
+	greet(msg);
+});
 
-bot.onText(/^\/(start|help)$/, msg => {
-	bot.sendMessage(msg.chat.id, help);
+bot.onText(/^\/start/, msg => {
+	greet(msg)
+	.then(x => {
+		giveHelp(msg);
+	});
+});
+
+bot.onText(/^\/help/, msg => {
+	giveHelp(msg);
+});
+
+bot.onText(/^\/feedback$/, (msg, match) => {
+	bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback THANKS FOR THE BOT'");
 });
 
 bot.onText(/^\/feedback (.+)$/, (msg, match) => {
-	bot.sendMessage(feedbackChat, 'NEW FEEDBACK (BOT):\n' + match[1]);
+	bot.sendMessage(feedbackChat, 'NEW FEEDBACK (BOT):\n' + match[1])
+	.then( x => {
+		bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
+	});
 });
 
 bot.on('location', (msg, match) => {
