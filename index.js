@@ -14,7 +14,7 @@ app
   res.json({version: packageInfo.version});
 })
 .post('/feedback', (req, res) => {
-   bot.sendMessage(feedbackChat, 'NEW FEEDBACK (WEB):\n' + req.body.message);
+   bot.sendMessage(feedbackChat, '#FEEDBACK_WEB:\n' + req.body.message);
    res.json({success: true});
 })
 .post('/' + bot.token, (req, res) => {
