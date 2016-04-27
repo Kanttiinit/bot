@@ -94,7 +94,7 @@ bot.onText(/No, don't use my location./, (msg, match) => {
 	bot.sendMessage(msg.chat.id, "Feel free to use the /menu command, then :)");
 })
 
-bot.onText(/^\/menu/, (msg, match) => {
+bot.onText(/^\/menu(@Kanttiini(.+))?$/, (msg, match) => {
 	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please. \nYou can get them with /restaurants ');
 });
 
@@ -149,12 +149,12 @@ bot.onText(/^\/help/, msg => {
 	giveHelp(msg);
 });
 
-bot.onText(/^\/feedback/, (msg, match) => {
+bot.onText(/^\/feedback(@Kanttiini(.+))?$/, (msg, match) => {
 	bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback thanks for the bot!'");
 });
 
 bot.onText(/^\/feedback (.+)$/, (msg, match) => {
-	bot.sendMessage(feedbackChat, 'NEW FEEDBACK (BOT):\n' + match[1])
+	bot.sendMessage(feedbackChat, '#FEEDBACK_BOT:\n' + match[1])
 	.then( x => {
 		bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
 	});
