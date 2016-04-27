@@ -1,6 +1,6 @@
 {
   "name": "kanttiinit-bot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Kanttiinit bot: Lunch menus within telegram",
   "main": "index.js",
   "scripts": {
