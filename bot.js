@@ -149,8 +149,8 @@ bot.onText(/^\/help/, msg => {
 	giveHelp(msg);
 });
 
-bot.onText(/^\/feedback$/, (msg, match) => {
-	bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback THANKS FOR THE BOT'");
+bot.onText(/^\/feedback/, (msg, match) => {
+	bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback thanks for the bot!'");
 });
 
 bot.onText(/^\/feedback (.+)$/, (msg, match) => {

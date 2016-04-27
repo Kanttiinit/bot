@@ -1,5 +1,9 @@
 Use me to get lunch menus within telegram - powered by kanttiinit.fi
 
+You can view my DNA at https://github.com/Kanttiinit/kanttiinit-bot
+We don't gather any personal data.
+We will ask for your permission if we request your location.
+
 The following commands are available:
 
 /food => interactive help for deciding where to eat
@@ -8,6 +12,6 @@ The following commands are available:
 /sub => posts the subway of the day
 
 /restaurants => a list of restaurantNames and IDs
-/start => this text
+/start => greeting + this text
 /help => this text
 /feedback [text] => sends a message with FRIENDLY feedback to the developers ;)
