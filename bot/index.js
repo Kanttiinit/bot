@@ -1,12 +1,8 @@
 const fetch = require('node-fetch');
 const request = require('request');
-const fs = require('fs');
 const TGBot = require('node-telegram-bot-api');
-const packageInfo = require('./package.json');
 
 const token = process.env.TG_BOT_TOKEN;
-const feedbackChat = process.env.CHAT_ID;
-const greeting = "Hello, human being.\nI'm KanttiinitBOT and I'm " + packageInfo.version + ' versions old.';
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -18,18 +14,11 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
-const help = fs.readFileSync('./start.txt');
+require('./feedback')(bot);
+require('./help')(bot);
 
 function json(url) {
 	return fetch(url).then(r => r.json());
-}
-
-function greet(msg) {
-	return bot.sendMessage(msg.chat.id, greeting);
-}
-
-function giveHelp(msg) {
-	return bot.sendMessage(msg.chat.id, help);
 }
 
 function postRestaurantWithID(chatID, restaurantID) {
@@ -131,32 +120,6 @@ bot.onText(/^\/restaurants/, (msg, match) => {
 		.join('\n');
 
 		bot.sendMessage(chatID, restaurantString);
-	});
-});
-
-bot.onText(/^(hello|hey|hi|moi|mo|hei|sup)$/i, msg => {
-	greet(msg);
-});
-
-bot.onText(/^\/start/, msg => {
-	greet(msg)
-	.then(x => {
-		giveHelp(msg);
-	});
-});
-
-bot.onText(/^\/help/, msg => {
-	giveHelp(msg);
-});
-
-bot.onText(/^\/feedback(@Kanttiini(.+))?$/, (msg, match) => {
-	bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback thanks for the bot!'");
-});
-
-bot.onText(/^\/feedback (.+)$/, (msg, match) => {
-	bot.sendMessage(feedbackChat, '#FEEDBACK_BOT:\n' + match[1])
-	.then( x => {
-		bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
 	});
 });
 
