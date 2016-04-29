@@ -3,6 +3,7 @@ const request = require('request');
 const TGBot = require('node-telegram-bot-api');
 
 const token = process.env.TG_BOT_TOKEN;
+const feedbackChat = process.env.CHAT_ID;
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -22,18 +23,23 @@ function json(url) {
 }
 
 function postRestaurantWithID(chatID, restaurantID) {
-	request({
-		url: 'https://api.kanttiinit.fi/restaurants/' + restaurantID + '/image',
-		encoding: null
-	}, function(err, response, buffer) {
-		if (response.statusCode === 200) {
-			bot.sendPhoto(chatID, buffer);
-		} else {
-			bot.sendMessage(chatID, 'Error with restaurant: ' + restaurantID + ' :(');
-			bot.sendMessage(feedbackChat,
-				'(BOT) Error ' + response.statusCode + ': postRestaurantWithID with restaurantID ' + restaurantID);
-		}
-	});
+	const restaurantUrl = 'https://api.kanttiinit.fi/restaurants/' + restaurantID + '/image';
+	if(json(restaurantUrl) === 'no such Restaurant'){
+		bot.sendMessage(chatID, 'Invalid restaurant ID');
+	} else {
+		request({
+			url: restaurantUrl,
+			encoding: null
+		}, function(err, response, buffer) {
+			if (response.statusCode === 200) {
+				bot.sendPhoto(chatID, buffer);
+			} else {
+				bot.sendMessage(chatID, 'Error with restaurant: ' + restaurantID + ' :(');
+				bot.sendMessage(feedbackChat,
+					'(BOT) Error ' + response.statusCode + ': postRestaurantWithID with restaurantID ' + restaurantID);
+			}
+		});
+	}
 };
 
 function postRestaurantWithName(chatID, restaurantName) {
@@ -127,7 +133,7 @@ bot.on('location', (msg, match) => {
 	postClosestRestaurants(msg, 3);
 });
 
-
+/*TODO: RETHINK THIS
 bot.on('inline_query', (msg) => {
 	json('https://api.kanttiinit.fi/restaurants')
 	.then(restaurants => {
@@ -162,5 +168,6 @@ bot.on('inline_query', (msg) => {
 		}
 	});
 });
+*/
 
 module.exports = bot;
