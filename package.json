@@ -14,6 +14,7 @@
     "fs": "0.0.2",
     "node-fetch": "^1.5.1",
     "node-telegram-bot-api": "~0.21.1",
-    "request": "^2.72.0"
+    "request": "^2.72.0",
+    "rsvp": "^3.2.1"
   }
 }

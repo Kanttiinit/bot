@@ -18,7 +18,6 @@ module.exports = function(bot) {
    });
 
    bot.onText(/^\/start/, msg => {
-      console.log(msg.chat.id);
    	greet(msg).then(_ => giveHelp(msg));
    });
 

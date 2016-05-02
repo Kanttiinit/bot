@@ -1,9 +1,8 @@
-const fetch = require('node-fetch');
-const request = require('request');
 const TGBot = require('node-telegram-bot-api');
 
 const token = process.env.TG_BOT_TOKEN;
 const feedbackChat = process.env.CHAT_ID;
+const api = require('./api');
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -18,49 +17,87 @@ if (process.env.NODE_ENV === 'production') {
 require('./feedback')(bot);
 require('./help')(bot);
 
-function json(url) {
-	return fetch(url).then(r => r.json());
-}
-
 function postRestaurantWithID(chatID, restaurantID) {
-	const restaurantUrl = 'https://api.kanttiinit.fi/restaurants/' + restaurantID + '/image';
-	if(json(restaurantUrl) === 'no such Restaurant'){
-		bot.sendMessage(chatID, 'Invalid restaurant ID');
-	} else {
-		request({
-			url: restaurantUrl,
-			encoding: null
-		}, function(err, response, buffer) {
-			if (response.statusCode === 200) {
-				bot.sendPhoto(chatID, buffer);
-			} else {
-				bot.sendMessage(chatID, 'Error with restaurant: ' + restaurantID + ' :(');
-				bot.sendMessage(feedbackChat,
-					'(BOT) Error ' + response.statusCode + ': postRestaurantWithID with restaurantID ' + restaurantID);
-			}
-		});
-	}
-};
-
-function postRestaurantWithName(chatID, restaurantName) {
-	json('https://api.kanttiinit.fi/restaurants')
-	.then(restaurants => {
-		const restaurant = restaurants.find(r => r.name.match(new RegExp('^' + restaurantName, 'i')));
-		if (restaurant) {
-			postRestaurantWithID(chatID, restaurant.id);
-		} else {
-			bot.sendMessage(chatID, 'Invalid restaurant :(');
-		}
+	api.getRestaurantImage(restaurantID)
+	.then( image => {
+		bot.sendPhoto(chatID, image);
+	}).catch( error => {
+		bot.sendMessage(chatID, 'Error with restaurant: ' + restaurantID);
 	});
 };
 
+function postRestaurantWithName(chatID, restaurantName) {
+	api.getRestaurantID(restaurantName)
+	.then( restaurantID => {
+		postRestaurantWithID(chatID, restaurantID);
+	}).catch( error => {
+		bot.sendMessage(chatID, 'Invalid restaurant :(');
+	});
+};
+
+function postRestaurantText(chatID, restaurantID) {
+	api.getRestaurantText(restaurantID)
+	.then( menuText => {
+		bot.sendMessage(chatID, menuText, {parse_mode:'HTML'});
+	}).catch( error => {
+		bot.sendMessage(chatID, 'Could not parse restaurant: ' + restaurantID);
+	});
+};
+
+
+bot.onText(/^\/(.*)?niemi/, (msg, match) => {
+	if(msg.chat.type === 'private') {
+		api.getAreaRestaurants('otaniemi')
+		.then( restaurants => {
+			restaurants
+			.map( restaurant => restaurant.id)
+			.forEach( restaurant => {
+				postRestaurantText(msg.chat.id, restaurant);
+			});
+		});
+	} else {
+		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /niemi in private!");
+	}
+});
+
+/*TODO: FIX WEIRD PARSING BUG BEFORE RELEASE
+bot.onText(/^\/(helsinki|hki|((.*)?keskusta))/, (msg, match) => {
+	if(msg.chat.type === 'private') {
+		api.getAreaRestaurants('helsingin keskusta')
+		.then( restaurants => {
+			restaurants
+			.map( restaurant => restaurant.id)
+			.forEach( restaurant => {
+				postRestaurantText(msg.chat.id, restaurant);
+			});
+		});
+	} else {
+		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /hki in private!");
+	}
+});
+*/
+
+bot.onText(/^\/töölö/, (msg, match) => {
+	if(msg.chat.type === 'private') {
+		api.getAreaRestaurants('töölö')
+		.then( restaurants => {
+			restaurants
+			.map( restaurant => restaurant.id)
+			.forEach( restaurant => {
+				postRestaurantText(msg.chat.id, restaurant);
+			});
+		});
+	} else {
+		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /töölö in private!");
+	}
+});
+
 function postClosestRestaurants(msg, n) {
-	const loc = msg.location;
-	json('https://api.kanttiinit.fi/restaurants?location=' + loc.latitude + ',' + loc.longitude)
+	api.getClosestRestaurants(msg.location, n)
 	.then( restaurants => {
-		for(var i = 0; i < n; i++) {
-			postRestaurantWithID(msg.chat.id, restaurants[i].id);
-		}
+		restaurants.forEach( restaurant => {
+			postRestaurantWithID(msg.chat.id, restaurant.id);
+		});
 	});
 };
 
@@ -87,14 +124,14 @@ bot.onText(/^\/food/, (msg, match) => {
 
 bot.onText(/No, don't use my location./, (msg, match) => {
 	bot.sendMessage(msg.chat.id, "Feel free to use the /menu command, then :)");
-})
+});
 
 bot.onText(/^\/menu(@Kanttiini(.+))?$/, (msg, match) => {
 	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please. \nYou can get them with /restaurants ');
 });
 
-bot.onText(/^\/menu (.+)$/, (msg, match) => {
-	const requested = match[1].toLowerCase();
+bot.onText(/^\/(menu|img) (.+)$/, (msg, match) => {
+	const requested = match[2].toLowerCase();
 	const chatID = msg.chat.id;
 	if (isNaN(requested)) {
 		postRestaurantWithName(chatID, requested);
@@ -103,30 +140,34 @@ bot.onText(/^\/menu (.+)$/, (msg, match) => {
 	}
 });
 
-bot.onText(/^\/sub/, (msg, match) => {
+bot.onText(/^\/txt (.+)$/, (msg, match) => {
+	const requested = match[1].toLowerCase();
 	const chatID = msg.chat.id;
-	json('https://api.kanttiinit.fi/menus/2')
-	.then(body => {
-		const subway = body[0].Menus[0].courses.find(m => m.title.match(/Subway\:/));
-		if (subway) {
-			bot.sendMessage(chatID, subway.title);
-		} else {
-			bot.sendMessage(chatID, 'No Subway today :(' );
-		}
+	if (isNaN(requested)) {
+		api.getRestaurantID(requested)
+		.then( restaurantID => {
+			postRestaurantText(chatID, restaurantID);
+		});
+	} else {
+		postRestaurantText(chatID, requested);
+	}
+});
+
+bot.onText(/^\/sub/, (msg, match) => {
+	api.getSubway()
+	.then( subway => {
+			bot.sendMessage(msg.chat.id, subway);
+	})
+	.catch( error => {
+			bot.sendMessage(msg.chat.id, 'No subway today :(');
 	});
 });
 
 bot.onText(/^\/restaurants/, (msg, match) => {
-	const chatID = msg.chat.id;
-	json('https://api.kanttiinit.fi/restaurants')
-	.then(restaurants => {
-		const restaurantString = restaurants
-		.sort((a, b) => a.name < b.name ? -1 : 1)
-		.map(r => r.name + ': ' + r.id)
-		.join('\n');
-
-		bot.sendMessage(chatID, restaurantString);
-	});
+	api.getRestaurants()
+	.then( restaurantString => {
+		bot.sendMessage(msg.chat.id, restaurantString);
+	})
 });
 
 bot.on('location', (msg, match) => {
