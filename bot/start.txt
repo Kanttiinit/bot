@@ -8,8 +8,10 @@ The following commands are available:
 
 /food => interactive help for deciding where to eat
 /<send location> => the closest 3 restaurants near you
-/menu [restaurantName OR ID] => lunch at the given restaurant
 /sub => posts the subway of the day
+/txt [restaurantName OR ID] => text of lunch at the given restaurant
+/menu [restaurantName OR ID] => image of lunch at the given restaurant
+/img [restaurantName OR ID] => image of lunch at the given restaurant
 
 /restaurants => a list of restaurantNames and IDs
 /start => greeting + this text

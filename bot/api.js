@@ -1,8 +1,13 @@
 const fetch = require('node-fetch');
 const request = require('request');
+const moment = require('moment');
 
 function json(url) {
 	return fetch(url).then(r => r.json());
+}
+
+function dayShort(offset) {
+	return moment().add(offset).format('dddd').toLowerCase().slice(0, 2);
 }
 
 module.exports = {
@@ -40,10 +45,11 @@ module.exports = {
 	getRestaurantText(restaurantID) {
 		return json('https://api.kanttiinit.fi/menus/' + restaurantID)
 		.then(restaurantData => {
+			const today = dayShort(0);
 			const name = restaurantData[0].name;
-			const openingHours = restaurantData[0].openingHours[0].join(' - ')
+			const openingHours = restaurantData[0].formattedOpeningHours[today];
 			const courses = restaurantData[0].Menus[0].courses;
-			var result = '<b>' + name + '</b> [' + openingHours + ']\n' +
+			var result = '<b>' + name + '</b> (' + openingHours + ')\n' +
 				courses.map(c => c.title + ' <i>' + c.properties.join(' ') + '</i>').join('\n');
 			return result;
 		});

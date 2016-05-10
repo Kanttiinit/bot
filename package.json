@@ -1,6 +1,6 @@
 {
   "name": "kanttiinit-bot",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Kanttiinit bot: Lunch menus within telegram",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "body-parser": "^1.15.0",
     "express": "~4.13.4",
     "fs": "0.0.2",
+    "moment": "^2.13.0",
     "node-fetch": "^1.5.1",
     "node-telegram-bot-api": "~0.21.1",
     "request": "^2.72.0",
