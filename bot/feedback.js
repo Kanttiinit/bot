@@ -1,4 +1,4 @@
-const feedbackChat = process.env.CHAT_ID;
+const feedbackChat = Number(process.env.CHAT_ID);
 
 module.exports = function(bot) {
     bot.onText(/^\/feedback(@Kanttiini(.+))?$/, (msg, match) => {
