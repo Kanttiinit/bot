@@ -7,7 +7,7 @@ module.exports = function(bot) {
 
     // sending feedback
     bot.onText(/^\/feedback (.+)$/, (msg, match) => {
-        bot.sendMessage(feedbackChat, '#FEEDBACK_BOT\nFeedback from: ' + msg.chat.id + '\n' + match[1])
+        bot.sendMessage(feedbackChat, '#FEEDBACK_BOT ' + msg.chat.id + '\n' + match[1])
             .then(x => {
                 bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
             });

@@ -5,3 +5,4 @@ dist
 run.sh
 npm-debug.log
 token.sh
+go.sh
