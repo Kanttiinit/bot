@@ -22,7 +22,7 @@ function postRestaurantWithID(chatID, restaurantID) {
 	.then( image => {
 		bot.sendPhoto(chatID, image);
 	}).catch( error => {
-		bot.sendMessage(chatID, 'Error with restaurant: ' + restaurantID);
+		bot.sendMessage(feedbackChat, error);
 	});
 };
 
@@ -44,51 +44,26 @@ function postRestaurantText(chatID, restaurantID) {
 	});
 };
 
+bot.onText(/^\/((?:ota)?niemi|töölö|helsinki|hki)/i, (msg, match) => {
+	const areas = [
+		{pattern: /helsinki|hki/i, name: 'helsingin keskusta'},
+		{pattern: /töölö/i, name: 'töölö'},
+		{pattern: /(ota)?niemi/i, name: 'otaniemi'}
+	];
 
-bot.onText(/^\/(.*)?niemi/, (msg, match) => {
-	if(msg.chat.type === 'private') {
-		api.getAreaRestaurants('otaniemi')
-		.then( restaurants => {
+	const area = areas.find(a => match[1].match(a.pattern));
+
+	if (msg.chat.type === 'private') {
+		api.getAreaRestaurants(area.name)
+		.then(restaurants => {
 			restaurants
-			.map( restaurant => restaurant.id)
-			.forEach( restaurant => {
+			.map(restaurant => restaurant.id)
+			.forEach(restaurant => {
 				postRestaurantText(msg.chat.id, restaurant);
 			});
 		});
 	} else {
 		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /niemi in private!");
-	}
-});
-
-/*TODO: FIX WEIRD PARSING BUG BEFORE RELEASE
-bot.onText(/^\/(helsinki|hki|((.*)?keskusta))/, (msg, match) => {
-	if(msg.chat.type === 'private') {
-		api.getAreaRestaurants('helsingin keskusta')
-		.then( restaurants => {
-			restaurants
-			.map( restaurant => restaurant.id)
-			.forEach( restaurant => {
-				postRestaurantText(msg.chat.id, restaurant);
-			});
-		});
-	} else {
-		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /hki in private!");
-	}
-});
-*/
-
-bot.onText(/^\/töölö/, (msg, match) => {
-	if(msg.chat.type === 'private') {
-		api.getAreaRestaurants('töölö')
-		.then( restaurants => {
-			restaurants
-			.map( restaurant => restaurant.id)
-			.forEach( restaurant => {
-				postRestaurantText(msg.chat.id, restaurant);
-			});
-		});
-	} else {
-		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /töölö in private!");
 	}
 });
 
