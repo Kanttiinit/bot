@@ -166,7 +166,7 @@ bot.onText(/^\/sub/, (msg, match) => {
 bot.onText(/^\/restaurants/, (msg, match) => {
 	api.getRestaurants()
 	.then( restaurantString => {
-		bot.sendMessage(msg.chat.id, restaurantString);
+		bot.sendMessage(msg.chat.id, restaurantString, {parse_mode:'HTML'});
 	})
 });
 

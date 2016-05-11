@@ -75,10 +75,14 @@ module.exports = {
 	getRestaurants() {
 		return json('https://api.kanttiinit.fi/restaurants')
 		.then(restaurants => {
-			return restaurants
+			const today = dayShort(0);
+			const formattedRestaurants = restaurants
 			.sort((a, b) => a.name < b.name ? -1 : 1)
-			.map(r => r.name + ': ' + r.id)
-			.join('\n');
+			.map(r => '<b>' + r.name + '</b> (' + r.formattedOpeningHours[today] + ') ' + '[' + r.id + ']')
+			return['<b>Name</b> (Opening Hours) [ID]\n'].concat(formattedRestaurants).join('\n');
+			//.unshift('<b>name<b>, (openingHours), ID')
+			//.join('\n');
+
 		});
 	}
 }
