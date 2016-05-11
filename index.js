@@ -5,21 +5,25 @@ const bot = require('./bot');
 
 const app = express();
 
+process.on('unhandledRejection', err => {
+	bot.sendMessage(feedbackChat, '#SRS_ERROR: ' + err);
+});
+
 const feedbackChat = process.env.CHAT_ID;
 
 app.use(bodyParser.json());
 
 app
 .get('/', (req, res) => {
-  res.json({version: packageInfo.version});
+	res.json({version: packageInfo.version});
 })
 .post('/feedback', (req, res) => {
-   bot.sendMessage(feedbackChat, '#FEEDBACK_WEB:\n' + req.body.message);
-   res.json({success: true});
+	bot.sendMessage(feedbackChat, '#FEEDBACK_WEB:\n' + req.body.message);
+	res.json({success: true});
 })
 .post('/' + bot.token, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
+	bot.processUpdate(req.body);
+	res.sendStatus(200);
 });
 
 app.listen(process.env.PORT || 3000);
