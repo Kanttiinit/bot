@@ -35,9 +35,7 @@ module.exports = {
 				if (response && response.statusCode === 200) {
 					resolve(buffer);
 				} else {
-					bot.sendMessage(feedbackChat,
-						'(BOT) Error ' + response.statusCode + ': postRestaurantWithID with restaurantID ' + restaurantID);
-					reject();
+					reject('(BOT) Error ' + response.statusCode + ': postRestaurantWithID with restaurantID ' + restaurantID);
 				}
 			});
 		});
