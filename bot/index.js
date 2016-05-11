@@ -44,11 +44,11 @@ function postRestaurantText(chatID, restaurantID) {
 	});
 };
 
-bot.onText(/^\/((?:ota)?niemi|töölö|helsinki|hki)/i, (msg, match) => {
+bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, match) => {
 	const areas = [
-		{pattern: /helsinki|hki/i, name: 'helsingin keskusta'},
-		{pattern: /töölö/i, name: 'töölö'},
-		{pattern: /(ota)?niemi/i, name: 'otaniemi'}
+		{pattern: /h(elsin)?ki|keskusta|stadi/i, name: 'helsingin keskusta', suggestion: 'hki'},
+		{pattern: /töölö/i, name: 'töölö', suggestion:'töölö'},
+		{pattern: /(.*)niemi/i, name: 'otaniemi', suggestion:'niemi'}
 	];
 
 	const area = areas.find(a => match[1].match(a.pattern));
@@ -63,7 +63,7 @@ bot.onText(/^\/((?:ota)?niemi|töölö|helsinki|hki)/i, (msg, match) => {
 			});
 		});
 	} else {
-		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /niemi in private!");
+		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /" + area.suggestion + ' in private!');
 	}
 });
 
@@ -76,7 +76,7 @@ function postClosestRestaurants(msg, n) {
 	});
 };
 
-bot.onText(/^\/food/, (msg, match) => {
+bot.onText(/^\/food/, msg => {
 	if(msg.chat.type === 'private') {
 		bot.sendMessage(msg.chat.id, 'Can I use your location?', {
 			'reply_markup':{
@@ -97,15 +97,15 @@ bot.onText(/^\/food/, (msg, match) => {
 	}
 });
 
-bot.onText(/No, don't use my location./, (msg, match) => {
+bot.onText(/No, don't use my location./, msg => {
 	bot.sendMessage(msg.chat.id, "Feel free to use the /menu command, then :)");
 });
 
-bot.onText(/^\/menu(@Kanttiini(.+))?$/, (msg, match) => {
+bot.onText(/^\/menu(@Kanttiini(.+))?$/, msg => {
 	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please. \nYou can get them with /restaurants ');
 });
 
-bot.onText(/^\/(menu|img) (.+)$/, (msg, match) => {
+bot.onText(/^\/(menu|im(?:a)?g(?:e)?) (.+)$/, (msg, match) => {
 	const requested = match[2].toLowerCase();
 	const chatID = msg.chat.id;
 	if (isNaN(requested)) {
@@ -115,7 +115,7 @@ bot.onText(/^\/(menu|img) (.+)$/, (msg, match) => {
 	}
 });
 
-bot.onText(/^\/txt (.+)$/, (msg, match) => {
+bot.onText(/^\/t(?:e)?xt (.+)$/, (msg, match) => {
 	const requested = match[1].toLowerCase();
 	const chatID = msg.chat.id;
 	if (isNaN(requested)) {
@@ -128,7 +128,7 @@ bot.onText(/^\/txt (.+)$/, (msg, match) => {
 	}
 });
 
-bot.onText(/^\/sub/, (msg, match) => {
+bot.onText(/^\/sub/, msg => {
 	api.getSubway()
 	.then( subway => {
 			bot.sendMessage(msg.chat.id, subway);
@@ -138,14 +138,14 @@ bot.onText(/^\/sub/, (msg, match) => {
 	});
 });
 
-bot.onText(/^\/restaurants/, (msg, match) => {
+bot.onText(/^\/restaurants/, msg => {
 	api.getRestaurants()
 	.then( restaurantString => {
 		bot.sendMessage(msg.chat.id, restaurantString, {parse_mode:'HTML'});
 	})
 });
 
-bot.on('location', (msg, match) => {
+bot.on('location', msg => {
 	postClosestRestaurants(msg, 3);
 });
 
