@@ -14,6 +14,7 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
+
 require('./feedback')(bot);
 require('./help')(bot);
 
@@ -70,9 +71,13 @@ bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, matc
 function postClosestRestaurants(msg, n) {
 	api.getClosestRestaurants(msg.location, n)
 	.then( restaurants => {
-		restaurants.forEach( restaurant => {
-			postRestaurantWithID(msg.chat.id, restaurant.id);
-		});
+		if(!restaurants.length) {
+			bot.sendMessage(msg.chat.id, 'All restaurants are closed right now.');
+		} else {
+			restaurants.forEach( restaurant => {
+				postRestaurantWithID(msg.chat.id, restaurant.id);
+			});
+		}
 	});
 };
 
@@ -101,8 +106,8 @@ bot.onText(/No, don't use my location./, msg => {
 	bot.sendMessage(msg.chat.id, "Feel free to use the /menu command, then :)");
 });
 
-bot.onText(/^\/menu(@Kanttiini(.+))?$/, msg => {
-	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please. \nYou can get them with /restaurants ');
+bot.onText(/^\/(menu|img|txt)(@Kanttiini(.+))?$/, (msg, match) => {
+	bot.sendMessage(msg.chat.id, 'Give me a restaurant name or ID, please.\n(For example: '+ match[0] + ' 3)\n\nYou can get them with /restaurants');
 });
 
 bot.onText(/^\/(menu|im(?:a)?g(?:e)?) (.+)$/, (msg, match) => {

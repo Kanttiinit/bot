@@ -1,6 +1,7 @@
 Use me to get lunch menus within telegram - powered by kanttiinit.fi
 
-You can view my DNA at https://github.com/Kanttiinit/kanttiinit-bot
 I won't gather any personal data.
 I will ask for your permission if I request your location.
-Try /commands
+
+Try /food to get started or
+check /commands to see my mad skills.

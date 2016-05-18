@@ -10,11 +10,53 @@ function dayShort(offset) {
 	return moment().add(offset).format('dddd').toLowerCase().slice(0, 2);
 }
 
+function currentTime() {
+	return moment().subtract(3, 'hours').format('HH:mm');
+}
+
+function openingHours(restaurantID) {
+	return json('https://api.kanttiinit.fi/restaurants')
+	.then(restaurants => {
+		const restaurant = restaurants.find(r => r.id === restaurantID);
+		if (restaurant) {
+			const openingHours = restaurant.formattedOpeningHours[dayShort(0)];
+			if(openingHours) {
+				return openingHours;
+			} else {
+				return "closed";
+			}
+		}
+	});
+}
+
 module.exports = {
+	isNear(restaurant) {
+		if(restaurant.distance) {
+			return restaurant.distance <= 5000;
+		} else {
+			return true;
+		}
+	},
+	isOpen(restaurant) {
+		const openingHours = restaurant.formattedOpeningHours[dayShort(0)];
+		if (openingHours === 'closed') {
+			return false;
+		} else {
+			const openFrom = openingHours.split(' - ')[0];
+			const openTo = openingHours.split(' - ')[1];
+			const timeNow = currentTime();
+			return timeNow > openFrom && timeNow < openTo;
+		}
+	},
 	getClosestRestaurants(location, n) {
 		const {latitude, longitude} = location;
 		return json('https://api.kanttiinit.fi/restaurants?location=' + latitude + ',' + longitude)
-		.then(restaurants => restaurants.splice(0, n));
+		.then(restaurants => {
+			const result = restaurants
+			.filter(restaurant => this.isOpen(restaurant) && this.isNear(restaurant))
+			.splice(0, n);
+			return result;
+		});
 	},
 	getRestaurantID(restaurantName) {
 		return json('https://api.kanttiinit.fi/restaurants')
@@ -43,11 +85,10 @@ module.exports = {
 	getRestaurantText(restaurantID) {
 		return json('https://api.kanttiinit.fi/menus/' + restaurantID)
 		.then(restaurantData => {
-			const today = dayShort(0);
 			const name = restaurantData[0].name;
-			const openingHours = restaurantData[0].formattedOpeningHours[today];
+			const openingHours = restaurantData[0].formattedOpeningHours[dayShort(0)];
 			const courses = restaurantData[0].Menus[0].courses;
-			var result = '<b>' + name + '</b> (' + openingHours + ')\n' +
+			const result = '<b>' + name + '</b> (' + openingHours + ')\n' +
 				courses.map(c => c.title + ' <i>' + c.properties.join(' ') + '</i>').join('\n');
 			return result;
 		});
@@ -80,7 +121,6 @@ module.exports = {
 			return['<b>Name</b> (Opening Hours) [ID]\n'].concat(formattedRestaurants).join('\n');
 			//.unshift('<b>name<b>, (openingHours), ID')
 			//.join('\n');
-
 		});
 	}
 }
