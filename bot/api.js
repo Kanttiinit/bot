@@ -11,7 +11,7 @@ function dayShort(offset) {
 }
 
 function currentTime() {
-	return moment().subtract(3, 'hours').format('HH:mm');
+	return moment().format('HH:mm');
 }
 
 function openingHours(restaurantID) {
