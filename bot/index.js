@@ -3,6 +3,7 @@ const TGBot = require('node-telegram-bot-api');
 const token = process.env.TG_BOT_TOKEN;
 const feedbackChat = process.env.CHAT_ID;
 const api = require('./api');
+const filters = require('./filters');
 
 var bot;
 if (process.env.NODE_ENV === 'production') {
@@ -45,6 +46,11 @@ function postRestaurantText(chatID, restaurantID) {
 	});
 };
 
+function applyFilters(restaurants, filters) {
+
+	return
+}
+
 bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, match) => {
 	const areas = [
 		{pattern: /h(elsin)?ki|keskusta|stadi/i, name: 'helsingin keskusta', suggestion: 'hki'},
@@ -56,7 +62,7 @@ bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, matc
 
 	if (msg.chat.type === 'private') {
 		api.getAreaRestaurants(area.name)
-		.then(restaurants => {
+		.then( restaurants => {
 			restaurants
 			.map(restaurant => restaurant.id)
 			.forEach(restaurant => {
@@ -71,10 +77,15 @@ bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, matc
 function postClosestRestaurants(msg, n) {
 	api.getClosestRestaurants(msg.location, n)
 	.then( restaurants => {
-		if(!restaurants.length) {
+		if (!restaurants.length) {
 			bot.sendMessage(msg.chat.id, 'All restaurants are closed right now.');
 		} else {
-			restaurants.forEach( restaurant => {
+			const result = restaurants
+			.filter( restaurant => {
+				return filters.isOpen(restaurant) && filters.isNear(restaurant);
+			})
+			.splice(0, n)
+			.forEach( restaurant => {
 				postRestaurantWithID(msg.chat.id, restaurant.id);
 			});
 		}
@@ -82,7 +93,7 @@ function postClosestRestaurants(msg, n) {
 };
 
 bot.onText(/^\/food/, msg => {
-	if(msg.chat.type === 'private') {
+	if (msg.chat.type === 'private') {
 		bot.sendMessage(msg.chat.id, 'Can I use your location?', {
 			'reply_markup':{
 				'keyboard':[[{
