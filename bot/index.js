@@ -15,40 +15,122 @@ if (process.env.NODE_ENV === 'production') {
 	});
 }
 
-
 require('./feedback')(bot);
 require('./help')(bot);
 
-function postRestaurantWithID(chatID, restaurantID) {
+const defaultUseImage = false;
+
+function postRestaurantImage(msg, restaurantID) {
 	api.getRestaurantImage(restaurantID)
 	.then( image => {
-		bot.sendPhoto(chatID, image);
+		bot.sendPhoto(msg.chat.id, image);
 	}).catch( error => {
 		bot.sendMessage(feedbackChat, error);
 	});
 };
 
-function postRestaurantWithName(chatID, restaurantName) {
-	api.getRestaurantID(restaurantName)
-	.then( restaurantID => {
-		postRestaurantWithID(chatID, restaurantID);
-	}).catch( error => {
-		bot.sendMessage(chatID, 'Invalid restaurant :(');
-	});
-};
-
-function postRestaurantText(chatID, restaurantID) {
+function postRestaurantText(msg, restaurantID) {
 	api.getRestaurantText(restaurantID)
 	.then( menuText => {
-		bot.sendMessage(chatID, menuText, {parse_mode:'HTML'});
+		bot.sendMessage(msg.chat.id, menuText, {parse_mode:'HTML'});
 	}).catch( error => {
-		bot.sendMessage(chatID, 'Could not parse restaurant: ' + restaurantID);
+		bot.sendMessage(msg.chat.id, 'Could not parse restaurant: ' + restaurantID);
 	});
 };
 
-function applyFilters(restaurants, filters) {
+function postRestaurantWithID(msg, restaurantID, useImage = defaultUseImage) {
+	if (useImage) {
+		postRestaurantImage(msg, restaurantID);
+	} else {
+		postRestaurantText(msg, restaurantID);
+	}
+}
 
-	return
+function postRestaurantWithName(msg, restaurantName, useImage = defaultUseImage) {
+	api.getRestaurantID(restaurantName)
+	.then( restaurantID => {
+		if (useImage) {
+			postRestaurantImage(msg, restaurantID);
+		} else {
+			postRestaurantText(msg, restaurantID);
+		}
+	}).catch( error => {
+		bot.sendMessage(msg.chat.id, 'Invalid restaurant :(');
+	});
+};
+
+
+function postRestaurants(msg, restaurants, useImage = defaultUseImage) {
+	restaurants.forEach( restaurant => {
+		if (useImage) {
+			postRestaurantImage(msg, restaurant.id);
+		} else {
+			postRestaurantText(msg, restaurant.id);
+		}
+	});
+}
+
+function postClosestRestaurants(msg, n, useImage = defaultUseImage) {
+	api.getClosestRestaurants(msg.location)
+	.then( restaurants => {
+		if (!restaurants.length) {
+			bot.sendMessage(msg.chat.id, 'All restaurants are unavailable right now.');
+		} else {
+			const filtered = restaurants.filter( restaurant => {
+				return filters.isOpen(restaurant);
+			});
+			if (filtered.length) {
+				if (filtered.length > n) {
+					postRestaurants(msg, filtered.splice(0, n), useImage);
+				} else {
+					postRestaurants(msg, filtered, useImage);
+				}
+			} else {
+				bot.sendMessage(msg.chat.id, "All restaurants are closed right now.")
+			}
+		}
+	});
+};
+
+function postAreaRestaurants(msg, areaName, useImage = defaultUseImage) {
+	api.getAreaRestaurants(areaName)
+	.then( restaurants => {
+		postRestaurants(msg, restaurants, useImage);
+	});
+}
+
+function postSubway(msg) {
+	api.getSubway()
+	.then( subway => {
+		bot.sendMessage(msg.chat.id, subway);
+	})
+	.catch( error => {
+		bot.sendMessage(msg.chat.id, 'No subway today :(');
+	});
+}
+
+function postRestaurantSummary(msg) {
+	api.getRestaurants()
+	.then( restaurantString => {
+		bot.sendMessage(msg.chat.id, restaurantString, {parse_mode:'HTML'});
+	})
+}
+
+function requestLocation(msg) {
+	bot.sendMessage(msg.chat.id, 'Can I use your location?', {
+		'reply_markup':{
+			'keyboard':[[{
+				'text':'Sure, use my location!',
+				'request_location':true
+			}], [{
+				'text':"No, don't use my location.",
+				'hide_keyboard':true
+			}]],
+			'resize_keyboard':true,
+			'one_time_keyboard':true,
+			'selective':true
+		}
+	});
 }
 
 bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, match) => {
@@ -61,53 +143,15 @@ bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, matc
 	const area = areas.find(a => match[1].match(a.pattern));
 
 	if (msg.chat.type === 'private') {
-		api.getAreaRestaurants(area.name)
-		.then( restaurants => {
-			restaurants
-			.map(restaurant => restaurant.id)
-			.forEach(restaurant => {
-				postRestaurantText(msg.chat.id, restaurant);
-			});
-		});
+		psotAreaRestaurants(msg, area.name);
 	} else {
 		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /" + area.suggestion + ' in private!');
 	}
 });
 
-function postClosestRestaurants(msg, n) {
-	api.getClosestRestaurants(msg.location, n)
-	.then( restaurants => {
-		if (!restaurants.length) {
-			bot.sendMessage(msg.chat.id, 'All restaurants are closed right now.');
-		} else {
-			const result = restaurants
-			.filter( restaurant => {
-				return filters.isOpen(restaurant) && filters.isNear(restaurant);
-			})
-			.splice(0, n)
-			.forEach( restaurant => {
-				postRestaurantWithID(msg.chat.id, restaurant.id);
-			});
-		}
-	});
-};
-
 bot.onText(/^\/food/, msg => {
 	if (msg.chat.type === 'private') {
-		bot.sendMessage(msg.chat.id, 'Can I use your location?', {
-			'reply_markup':{
-				'keyboard':[[{
-					'text':'Sure, use my location!',
-					'request_location':true
-				}], [{
-					'text':"No, don't use my location.",
-					'hide_keyboard':true
-				}]],
-				'resize_keyboard':true,
-				'one_time_keyboard':true,
-				'selective':true
-			}
-		});
+		requestLocation(msg);
 	} else {
 		bot.sendMessage(msg.chat.id, 'The /food command only works in private chats :(');
 	}
@@ -125,40 +169,30 @@ bot.onText(/^\/(menu|im(?:a)?g(?:e)?) (.+)$/, (msg, match) => {
 	const requested = match[2].toLowerCase();
 	const chatID = msg.chat.id;
 	if (isNaN(requested)) {
-		postRestaurantWithName(chatID, requested);
+		postRestaurantWithName(msg, requested, true);
 	} else {
-		postRestaurantWithID(chatID, requested);
+		postRestaurantWithID(msg, requested, true);
 	}
 });
 
 bot.onText(/^\/t(?:e)?xt (.+)$/, (msg, match) => {
 	const requested = match[1].toLowerCase();
-	const chatID = msg.chat.id;
 	if (isNaN(requested)) {
 		api.getRestaurantID(requested)
 		.then( restaurantID => {
-			postRestaurantText(chatID, restaurantID);
+			postRestaurantText(msg, restaurantID);
 		});
 	} else {
-		postRestaurantText(chatID, requested);
+		postRestaurantText(msg, requested);
 	}
 });
 
 bot.onText(/^\/sub/, msg => {
-	api.getSubway()
-	.then( subway => {
-			bot.sendMessage(msg.chat.id, subway);
-	})
-	.catch( error => {
-			bot.sendMessage(msg.chat.id, 'No subway today :(');
-	});
+	postSubway(msg);
 });
 
 bot.onText(/^\/restaurants/, msg => {
-	api.getRestaurants()
-	.then( restaurantString => {
-		bot.sendMessage(msg.chat.id, restaurantString, {parse_mode:'HTML'});
-	})
+	postRestaurantSummary(msg);
 });
 
 bot.on('location', msg => {

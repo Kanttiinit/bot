@@ -7,7 +7,11 @@ function json(url) {
 }
 
 function dayShort(offset) {
-	return moment().add(offset).format('dddd').toLowerCase().slice(0, 2);
+	return moment().locale('fi').add(offset, 'day').format('dddd').toLowerCase().slice(0, 2);
+}
+
+function day(offset) {
+	return moment().add(offset, 'day').format('YYYY-MM-DD');
 }
 
 function openingHours(restaurantID) {
@@ -26,7 +30,7 @@ function openingHours(restaurantID) {
 }
 
 module.exports = {
-	getClosestRestaurants(location, n) {
+	getClosestRestaurants(location) {
 		const {latitude, longitude} = location;
 		return json('https://api.kanttiinit.fi/restaurants?location=' + latitude + ',' + longitude)
 		.then(restaurants => {
@@ -60,12 +64,18 @@ module.exports = {
 	getRestaurantText(restaurantID) {
 		return json('https://api.kanttiinit.fi/menus/' + restaurantID)
 		.then( restaurantData => {
+			const dayOffset = 0;
 			const name = restaurantData[0].name;
-			const openingHours = restaurantData[0].formattedOpeningHours[dayShort(0)];
-			const courses = restaurantData[0].Menus[0].courses;
-			const result = '<b>' + name + '</b> (' + openingHours + ')\n' +
-				courses.map(c => c.title + ' <i>' + c.properties.join(' ') + '</i>').join('\n');
-			return result;
+			const today = day(dayOffset);
+			const todayShort = dayShort(dayOffset);
+			const openingHours = restaurantData[0].formattedOpeningHours[dayShort(dayOffset)];
+			const dataToday = restaurantData[0].Menus.find( r => r.day.match(new RegExp('^' + today, 'i')));
+			if (dataToday) {
+				const courses = dataToday.courses.map(c => c.title + ' <i>' + c.properties.join(' ') + '</i>').join('\n');
+				return '<b>' + name + '</b> (' + openingHours + ')\n' + courses;
+			} else {
+				return '<b>' + name + '</b>\nNo menu available.';
+			}
 		});
 	},
 	getAreaRestaurants(areaName) {
@@ -79,10 +89,18 @@ module.exports = {
 	},
 	getSubway() {
 		return json('https://api.kanttiinit.fi/menus/2')
-		.then( body => {
-			const subway = body[0].Menus[0].courses.find(m => m.title.match(/Subway\:/));
-			if (subway) {
-				return subway.title;
+		.then( restaurantData => {
+			const today = day(0);
+			const dataToday = restaurantData[0].Menus.find( r => r.day.match(new RegExp(today, 'i')));
+			if (dataToday) {
+				const subway = dataToday.courses.find( m => m.title.match(/Subway\:/));
+				if (subway) {
+					return subway.title;
+				} else {
+					return 'No subway today :(';
+				}
+			} else {
+				return "No food at T-Talo today.";
 			}
 		});
 	},
