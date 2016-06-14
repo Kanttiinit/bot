@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 function dayShort(offset) {
-	return moment().add(offset).format('dddd').toLowerCase().slice(0, 2);
+	return moment().locale('fi').add(offset).format('dddd').toLowerCase().slice(0, 2);
 }
 
 function currentTime() {
@@ -18,7 +18,7 @@ module.exports = {
 	},
 	isOpen(restaurant) {
 		const openingHours = restaurant.formattedOpeningHours[dayShort(0)];
-		if (openingHours === 'closed') {
+		if (!openingHours || openingHours === 'closed') {
 			return false;
 		} else {
 			const openFrom = openingHours.split(' - ')[0];

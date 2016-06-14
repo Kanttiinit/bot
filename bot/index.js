@@ -143,7 +143,7 @@ bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, matc
 	const area = areas.find(a => match[1].match(a.pattern));
 
 	if (msg.chat.type === 'private') {
-		psotAreaRestaurants(msg, area.name);
+		postAreaRestaurants(msg, area.name);
 	} else {
 		bot.sendMessage(msg.chat.id, "I don't want to spam group chats. Try /" + area.suggestion + ' in private!');
 	}
