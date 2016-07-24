@@ -76,9 +76,13 @@ function postClosestRestaurants(msg, n, useImage = defaultUseImage) {
 		if (!restaurants.length) {
 			bot.sendMessage(msg.chat.id, 'All restaurants are unavailable right now.');
 		} else {
+			const filtered = restaurants;
+			/*
+			TODO: Add filtering according to user preferences ?
 			const filtered = restaurants.filter( restaurant => {
 				return filters.isOpen(restaurant);
 			});
+			*/
 			if (filtered.length) {
 				if (filtered.length > n) {
 					postRestaurants(msg, filtered.splice(0, n), useImage);

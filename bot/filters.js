@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 function dayShort(offset) {
-	return moment().locale('fi').add(offset).format('dddd').toLowerCase().slice(0, 2);
+	return moment().locale('fi').add(offset, 'days').format('dddd').toLowerCase().slice(0, 2);
 }
 
 function currentTime() {
