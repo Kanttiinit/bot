@@ -105,6 +105,9 @@ module.exports = {
 		});
 	},
 	getRestaurants() {
+		return json('https://api.kanttiinit.fi/restaurants');
+	},
+	getRestaurantsFormatted() {
 		return json('https://api.kanttiinit.fi/restaurants')
 		.then( restaurants => {
 			const today = dayShort(0);

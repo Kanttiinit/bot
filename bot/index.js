@@ -80,7 +80,9 @@ function postClosestRestaurants(msg, n, useImage = defaultUseImage) {
 			/*
 			TODO: Add filtering according to user preferences ?
 			const filtered = restaurants.filter( restaurant => {
-				return filters.isOpen(restaurant);
+				//TODO: Add filters based on user preferences?
+				//return filters.isOpen(restaurant);
+				return true;
 			});
 			*/
 			if (filtered.length) {
@@ -114,7 +116,7 @@ function postSubway(msg) {
 }
 
 function postRestaurantSummary(msg) {
-	api.getRestaurants()
+	api.getRestaurantsFormatted()
 	.then( restaurantString => {
 		bot.sendMessage(msg.chat.id, restaurantString, {parse_mode:'HTML'});
 	})
@@ -136,6 +138,20 @@ function requestLocation(msg) {
 		}
 	});
 }
+
+//Thanks telegram API
+function toTgFormat(string) {return string.replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/_/g, ' ');}
+
+//Fuzzy finding for autofilled commands
+bot.onText(/(?!\/)(.*)/, (msg, [restaurantName]) => {
+	if (msg.chat.type === 'private') {
+		api.getRestaurants()
+		.then( restaurants => {
+			const restaurant = restaurants.find( r => toTgFormat(r.name).match(new RegExp(toTgFormat(restaurantName), 'i')));
+			if (restaurant) postRestaurantWithID(msg, restaurant.id);
+		});
+	}
+});
 
 bot.onText(/^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i, (msg, match) => {
 	const areas = [
@@ -203,8 +219,10 @@ bot.on('location', msg => {
 	postClosestRestaurants(msg, 3);
 });
 
-/*TODO: RETHINK THIS
+
+/*
 bot.on('inline_query', (msg) => {
+	console.log(msg);
 	json('https://api.kanttiinit.fi/restaurants')
 	.then(restaurants => {
 		const results = [];
