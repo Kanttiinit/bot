@@ -16,7 +16,7 @@ module.exports = function(bot) {
    }
 
    function giveHelp(msg) {
-   	return bot.sendMessage(msg.chat.id, help);
+   	return bot.sendMessage(msg.chat.id, commands);
    }
 
 	 function giveCommands(msg) {

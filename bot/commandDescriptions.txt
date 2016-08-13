@@ -24,3 +24,5 @@ unicafe_metsatalo - UniCafe Metsätalo menu
 unicafe_paarakennus - UniCafe Päärakennus menu
 unicafe_topelias - UniCafe Topelias menu
 unicafe_ylioppilasaukio - UniCafe Ylioppilasaukio menu
+help - get the commands of the bot
+feedback - send feedback to the developers<3

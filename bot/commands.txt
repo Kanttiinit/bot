@@ -3,6 +3,9 @@ The following commands are available:
 <send location>
 the closest 3 open restaurants to you
 
+/<restaurantname>
+text of lunch at the given restaurant
+
 /food
 interactive help for deciding where to eat
 
