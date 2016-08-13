@@ -4,7 +4,7 @@ const fs = require('fs');
 const greeting = `Hello, human being.
 I'm KanttiinitBOT and I'm ${packageInfo.version} versions old.
 
-Try /food to get started
+Try typing / to get started
 or /help to see what I do.`;
 
 const help = fs.readFileSync(__dirname + '/help.txt');
@@ -12,7 +12,7 @@ const commands = fs.readFileSync(__dirname + '/commands.txt');
 
 module.exports = function(bot) {
    function greet(msg) {
-   	return bot.sendMessage(msg.chat.id, greeting);
+   	return bot.sendMessage(msg.chat.id, help);
    }
 
    function giveHelp(msg) {

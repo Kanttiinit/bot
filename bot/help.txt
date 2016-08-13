@@ -1,7 +1,5 @@
-Use me to get lunch menus within telegram - powered by kanttiinit.fi
+Hello!
 
-I won't gather any personal data.
-I will ask for your permission if I request your location.
+Send me your location, type /help or simply enter / to the message box to view commands.
 
-Try /food to get started or
-check /commands to see my mad skills.
+Powered by kanttiinit.fi
