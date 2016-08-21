@@ -6,13 +6,14 @@
   "scripts": {
     "start": "node index.js"
   },
-	"engines": {
+  "engines": {
     "node": "6.0.0"
   },
   "author": "Laged",
   "license": "BSD-2-Clause",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "cors": "^2.7.1",
     "express": "~4.13.4",
     "fs": "0.0.2",
     "moment": "^2.13.0",
