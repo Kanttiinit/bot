@@ -143,7 +143,7 @@ function requestLocation(msg) {
 function toTgFormat(string) {return string.replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/_/g, ' ');}
 
 //Fuzzy finding for autofilled commands
-bot.onText(/(?!\/)(.*)/, (msg, [restaurantName]) => {
+bot.onText(/(?!\/).+?(?=@|$)/, (msg, [restaurantName]) => {
 	if (msg.chat.type === 'private') {
 		api.getRestaurants()
 		.then( restaurants => {
