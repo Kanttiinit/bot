@@ -1,16 +1,24 @@
 const feedbackChat = Number(process.env.CHAT_ID);
 
+function sendFeedback(bot, msg, feedback) {
+  bot.sendMessage(feedbackChat, '#FEEDBACK_BOT ' + msg.chat.id + '\n' + feedback)
+      .then(x => {
+          bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
+      });
+}
+
 module.exports = function(bot) {
-    bot.onText(/^\/feedback(@Kanttiini(.+))?$/, (msg, match) => {
+    bot.onText(/^\/(feedback)(@KanttiinitBOT) ?(.+)?$/, (msg, match) => {
+      if (match[3]) {
+        sendFeedback(bot, msg, match[3]);
+      } else {
         bot.sendMessage(msg.chat.id, "Please give some feedback like '/feedback thanks for the bot!'");
+      }
     });
 
     // sending feedback
     bot.onText(/^\/feedback (.+)$/, (msg, match) => {
-        bot.sendMessage(feedbackChat, '#FEEDBACK_BOT ' + msg.chat.id + '\n' + match[1])
-            .then(x => {
-                bot.sendMessage(msg.chat.id, 'Thanks for the feedback!');
-            });
+      sendFeedback(bot, msg, match[1]);
     });
 
     // responding to feedback
