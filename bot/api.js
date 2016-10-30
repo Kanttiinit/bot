@@ -116,5 +116,21 @@ module.exports = {
 			.map(r => '<b>' + r.name + '</b> (' + r.formattedOpeningHours[today] + ') ' + '[' + r.id + ']')
 			return['<b>Name</b> (Opening Hours) [ID]\n'].concat(formattedRestaurants).join('\n');
 		});
+	},
+	interpretVoice(fileLink) {
+		//send for processing (audio.kanttiinit.fi)
+		return new Promise((resolve, reject) => {
+			request.post('https://audio.kanttiinit.fi/',
+			{"audioFileUrl": fileLink},
+			function(err, response, body) {
+				if (response && response.statusCode === 200) {
+					//send it to user
+					resolve(body);
+				} else {
+					reject('(BOT) Error Could not be processed');
+				}
+			}
+			);
+		});
 	}
 }
