@@ -2,8 +2,9 @@ import kitchen from './api/kitchen';
 
 import moment = require('moment');
 
-function getTodayAsDayOffset(): number {
-  return Number(moment().format('d'));
+function getTodayAsDayOfWeek(): number {
+  const dayOfWeek = Number(moment().format('d'));
+  return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 }
 
 export default {
@@ -22,7 +23,7 @@ export default {
     const restaurant = await kitchen.getRestaurantWithMenu(restaurantId);
     const { name, openingHours } = restaurant;
     const menu = restaurant.menus[0];
-    const dayIndex = getTodayAsDayOffset();
+    const dayIndex = getTodayAsDayOfWeek();
     if (menu) {
       const courses = menu.courses
         .map(c => `${c.title} <i>${c.properties.join(' ')}</i>`)
@@ -51,7 +52,7 @@ export default {
   },
   async getRestaurantsFormatted() {
     const restaurants = await kitchen.getRestaurants();
-    const dayIndex = getTodayAsDayOffset();
+    const dayIndex = getTodayAsDayOfWeek();
     const formattedRestaurants = restaurants
       .sort((a, b) => (a.name < b.name ? -1 : 1))
       .map(r => `<b>${r.name}</b> (${r.openingHours[dayIndex] || 'closed'}) [${r.id}]`);
