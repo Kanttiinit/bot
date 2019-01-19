@@ -24,7 +24,7 @@ export default {
     const { name, openingHours } = restaurant;
     const menu = restaurant.menus[0];
     const dayIndex = getTodayAsDayOfWeek();
-    if (menu) {
+    if (menu && menu.courses && menu.courses.length > 0) {
       const courses = menu.courses
         .map(c => `${c.title} <i>${c.properties.join(' ')}</i>`)
         .join('\n');
