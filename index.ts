@@ -1,16 +1,18 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const packageInfo = require('./package.json');
-const bot = require('./bot');
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
+import * as packageInfo from './package.json';
+import createBot from './src';
 
 const app = express();
+
+const feedbackChat = process.env.CHAT_ID;
+
+const bot = createBot();
 
 process.on('unhandledRejection', (err) => {
   bot.sendMessage(feedbackChat, `#SRS_ERROR: ${err}`);
 });
-
-const feedbackChat = process.env.CHAT_ID;
 
 app.use(bodyParser.json());
 
