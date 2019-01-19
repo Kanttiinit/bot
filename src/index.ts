@@ -123,14 +123,6 @@ function root(bot) {
       .replace(/_/g, ' ');
   }
 
-  bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
-    console.log('bot got message: ', msg);
-
-    // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, 'Received your message');
-  });
-
   // Fuzzy finding for autofilled commands
   bot.onText(/(?!\/).+?(?=@|$)/, (msg, [restaurantName]) => {
     if (msg.chat.type === 'private') {
@@ -193,11 +185,10 @@ function root(bot) {
 
   bot.onText(/^\/(menu|im(?:a)?g(?:e)?) (.+)$/, (msg, match) => {
     const requested = match[2].toLowerCase();
-    const chatID = msg.chat.id;
     if (isNaN(requested)) {
-      postRestaurantWithName(msg, requested, true);
+      postRestaurantWithName(msg, requested);
     } else {
-      postRestaurantWithID(msg, requested, true);
+      postRestaurantWithID(msg, requested);
     }
   });
 

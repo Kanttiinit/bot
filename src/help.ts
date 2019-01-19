@@ -1,6 +1,6 @@
-import * as help from './help.json';
+import { message as help } from './help.json';
 
-import * as commands from './commands.json';
+import { message as commands } from './commands.json';
 
 export default function (bot) {
   function greet(msg) {
