@@ -9,5 +9,5 @@
     "types": ["node"],
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "./node_modules/@types/node/index.d.ts"]
+  "include": ["./**/*", "./node_modules/@types/node/index.d.ts"]
 }

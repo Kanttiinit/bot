@@ -3,7 +3,9 @@
   "parser": "typescript-eslint-parser",
   "plugins": ["import", "typescript"],
   "rules": {
-    "strict": 0
+    "strict": 0,
+    "import/prefer-default-export": 0,
+    "no-unused-vars": 1
   },
   "settings": {
     "import/resolver": {
