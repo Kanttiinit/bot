@@ -1,5 +1,3 @@
-// https://kitchen.kanttiinit.fi/areas
-
 type url = string;
 
 export type OpeningHour = Array<string | null>;
