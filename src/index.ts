@@ -134,7 +134,7 @@ function root(bot) {
   });
 
   bot.onText(
-    /^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi)/i,
+    /^\/((?:.*)niemi|töölö|h(?:elsin)?ki|keskusta|stadi|vantaa|arabia|kumpula|viikki|meilahti|leppävaara|kallio)/i,
     (msg, match) => {
       const areas = [
         {
@@ -143,6 +143,13 @@ function root(bot) {
           suggestion: 'hki',
         },
         { pattern: /töölö/i, name: 'töölö', suggestion: 'töölö' },
+        { pattern: /vantaa/i, name: 'vantaa', suggestion: 'vantaa' },
+        { pattern: /arabia/i, name: 'arabia', suggestion: 'arabia' },
+        { pattern: /kumpula/i, name: 'kumpula', suggestion: 'kumpula' },
+        { pattern: /viikki/i, name: 'viikki', suggestion: 'viikki' },
+        { pattern: /meilahti/i, name: 'meilahti', suggestion: 'meilahti' },
+        { pattern: /leppävaara/i, name: 'leppävaara', suggestion: 'leppävaara' },
+        { pattern: /kallio/i, name: 'kallio & sörnäinen', suggestion: 'kallio' },
         { pattern: /(.*)niemi/i, name: 'otaniemi', suggestion: 'niemi' },
       ];
 
