@@ -6,22 +6,8 @@ import feedback from './feedback';
 import help from './help';
 
 const token = process.env.TG_BOT_TOKEN;
-const feedbackChatId = process.env.CHAT_ID;
 
 function root(bot) {
-  const defaultUseImage = false;
-
-  function postRestaurantImage(msg, restaurantID) {
-    api
-      .getRestaurantImage(restaurantID)
-      .then((image) => {
-        bot.sendPhoto(msg.chat.id, image);
-      })
-      .catch((error) => {
-        bot.sendMessage(feedbackChatId, error);
-      });
-  }
-
   function postRestaurantText(msg, restaurantID) {
     api
       .getRestaurantText(restaurantID)
@@ -36,44 +22,31 @@ function root(bot) {
       });
   }
 
-  function postRestaurantWithID(msg, restaurantID, useImage = defaultUseImage) {
-    if (useImage) {
-      postRestaurantImage(msg, restaurantID);
-    } else {
-      postRestaurantText(msg, restaurantID);
-    }
+  function postRestaurantWithID(msg, restaurantID) {
+    postRestaurantText(msg, restaurantID);
   }
 
   function postRestaurantWithName(
     msg,
     restaurantName,
-    useImage = defaultUseImage,
   ) {
     api
       .getRestaurantID(restaurantName)
       .then((restaurantID) => {
-        if (useImage) {
-          postRestaurantImage(msg, restaurantID);
-        } else {
-          postRestaurantText(msg, restaurantID);
-        }
+        postRestaurantText(msg, restaurantID);
       })
       .catch((error) => {
         bot.sendMessage(msg.chat.id, 'Invalid restaurant :(');
       });
   }
 
-  function postRestaurants(msg, restaurants, useImage = defaultUseImage) {
+  function postRestaurants(msg, restaurants) {
     restaurants.forEach((restaurant) => {
-      if (useImage) {
-        postRestaurantImage(msg, restaurant.id);
-      } else {
-        postRestaurantText(msg, restaurant.id);
-      }
+      postRestaurantText(msg, restaurant.id);
     });
   }
 
-  function postClosestRestaurants(msg, n, useImage = defaultUseImage) {
+  function postClosestRestaurants(msg, n) {
     api.getClosestRestaurants(msg.location).then((restaurants) => {
       if (!restaurants.length) {
         bot.sendMessage(
@@ -84,9 +57,9 @@ function root(bot) {
         const filtered = restaurants;
         if (filtered.length) {
           if (filtered.length > n) {
-            postRestaurants(msg, filtered.splice(0, n), useImage);
+            postRestaurants(msg, filtered.splice(0, n));
           } else {
-            postRestaurants(msg, filtered, useImage);
+            postRestaurants(msg, filtered);
           }
         } else {
           bot.sendMessage(msg.chat.id, 'All restaurants are closed right now.');
@@ -95,9 +68,9 @@ function root(bot) {
     });
   }
 
-  function postAreaRestaurants(msg, areaName, useImage = defaultUseImage) {
+  function postAreaRestaurants(msg, areaName) {
     api.getAreaRestaurants(areaName).then((restaurants) => {
-      postRestaurants(msg, restaurants, useImage);
+      postRestaurants(msg, restaurants);
     });
   }
 
