@@ -129,27 +129,6 @@ function postRestaurantSummary(msg) {
   });
 }
 
-function postVoiceCommand(msg) {
-  console.log('Received voice command:');
-  console.log(msg);
-  bot
-    .getFileLink(msg.voice.file_id)
-    .then((fileLink) => {
-      console.log(fileLink);
-      api
-        .interpretVoice(fileLink)
-        .then((rsp) => {
-          console.log('Processed audio');
-          // bot.sendMessage(msg.chat.id, "menu")
-        })
-        .catch((error) => {
-          console.log(`Error${error}`);
-          bot.sendMessage(msg.chat.id, "Couldn't understand you.");
-        });
-    })
-    .catch((error) => {
-      console.log(`Error${error}`);
-      bot.sendMessage(msg.chat.id, "Couldn't download audio file.");
     });
 }
 

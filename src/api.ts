@@ -16,20 +16,6 @@ function dayShort(offset) {
     .slice(0, 2);
 }
 
-// function openingHours(restaurantID) {
-//   return json('https://api.kanttiinit.fi/restaurants')
-//     .then((restaurants) => {
-//       const restaurant = restaurants.find(r => r.id === restaurantID);
-//       if (restaurant) {
-//         const openingHours = restaurant.formattedOpeningHours[dayShort(0)];
-//         if (openingHours) {
-//           return openingHours;
-//         }
-//         return 'closed';
-//       }
-//     });
-// }
-
 export default {
   getClosestRestaurants(location) {
     const { latitude, longitude } = location;
@@ -112,20 +98,5 @@ export default {
           .map(r => `<b>${r.name}</b> (${r.formattedOpeningHours[today]}) ` + `[${r.id}]`);
         return ['<b>Name</b> (Opening Hours) [ID]\n'].concat(formattedRestaurants).join('\n');
       });
-  },
-  interpretVoice(fileLink) {
-    // send for processing (audio.kanttiinit.fi)
-    return new Promise((resolve, reject) => {
-      request.post('https://audio.kanttiinit.fi/',
-        { audioFileUrl: fileLink },
-        (err, response, body) => {
-          if (response && response.statusCode === 200) {
-            // send it to user
-            resolve(body);
-          } else {
-            reject('(BOT) Error Could not be processed');
-          }
-        });
-    });
   },
 };
