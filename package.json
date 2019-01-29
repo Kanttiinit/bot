@@ -19,7 +19,6 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-typescript": "^0.14.0",
-    "typescript": "^3.2.2",
     "typescript-eslint-parser": "^21.0.2"
   },
   "dependencies": {
@@ -29,6 +28,7 @@
     "moment": "^2.23.0",
     "node-fetch": "^2.3.0",
     "node-telegram-bot-api": "^0.30.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "typescript": "^3.2.2"
   }
 }
